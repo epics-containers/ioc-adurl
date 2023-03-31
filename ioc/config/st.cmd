@@ -1,18 +1,25 @@
-# An example IOC startup script for verifying that a generic IOC binary
-# has been built correctly.
 
-on 'error' 'break'
+cd "$(TOP)"
+
 epicsEnvSet("EPICS_CA_REPEATER_PORT","7065")
 epicsEnvSet("EPICS_CA_SERVER_PORT","7064")
-epicsEnvSet("EPICS_CA_MAX_ARRAY_BYTES","3000000")
-epicsEnvSet("EPICS_TS_MIN_WEST","0")
-
 
 dbLoadDatabase "dbd/ioc.dbd"
 ioc_registerRecordDeviceDriver(pdbbase)
 
-dbLoadRecords("config/ioc.db")
+URLDriverConfig("EXAMPLE.CAM", 0, 0)
 
-epicsEnvSet("PRINTDEBUG", "3")
+# NDPvaConfigure(portName, queueSize, blockingCallbacks, NDArrayPort, NDArrayAddr, pvName, maxMemory, priority, stackSize)
+NDPvaConfigure("EXAMPLE.PVA", 2, 0, "EXAMPLE.CAM", 0, "EXAMPLE:IMAGE", 0, 0, 0)
+startPVAServer
 
+# instantiate Database records for Url Detector
+dbLoadRecords("URLDriver.template","P=EXAMPLE, R=:CAM:, PORT=EXAMPLE.CAM, TIMEOUT=1, ADDR=0")
+dbLoadRecords("NDPva.template", "P=EXAMPLE, R=:PVA:, PORT=EXAMPLE.PVA, ADDR=0, TIMEOUT=1, NDARRAY_PORT=EXAMPLE.CAM, NDARRAY_ADR=0, ENABLED=1")
+
+# start IOC shell
 iocInit
+
+# poke some records
+dbpf "EXAMPLE:CAM:AcquirePeriod", "0.1"
+
