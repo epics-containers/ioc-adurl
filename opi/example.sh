@@ -8,7 +8,7 @@ ${THIS_DIR}/launcher.sh example example.edl
 caput -S EXAMPLE:CAM:URL1 /tmp/millie.jpg
 cp ${THIS_DIR}/millie.jpg /tmp/millie.jpg
 
-caput EXAMPLE:CAM:Acquire.PROC 1
+caput EXAMPLE:CAM:Acquire 1
 
 c2dv --pv EXAMPLE:IMAGE
 
